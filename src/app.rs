@@ -1,13 +1,19 @@
 use winit::{window::{Window, WindowBuilder}, event_loop::EventLoop, event::{Event, WindowEvent}};
 
+use crate::wgpu::RenderInstance;
+
 pub struct Application<'a> {
+    render_instance: RenderInstance,
     window: &'a Window,
 }
 
 impl<'a> Application<'a> {
-    pub fn new(window: &'a Window) -> Self {        
+    pub fn new(window: &'a Window) -> Self {
+        let render_instance = RenderInstance::new(window);
+
         Application {
-            window
+            window,
+            render_instance,
         }
     }
 
