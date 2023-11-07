@@ -13,7 +13,7 @@ pub struct Application<'a> {
 
 impl<'a> Application<'a> {
     pub fn new(window: &'a Window) -> Self {
-        let render_instance = RenderInstance::new(window);
+        let render_instance = pollster::block_on(RenderInstance::new(window));
 
         Application {
             window,

@@ -6,8 +6,10 @@ use winit::{
 };
 
 fn main() {
+    kappa::log::init();
+
     let event_loop = EventLoop::new().unwrap();
-    let mut window_builder = WindowBuilder::new()
+    let window_builder = WindowBuilder::new()
         .with_enabled_buttons(WindowButtons::CLOSE | WindowButtons::MINIMIZE)
         .with_inner_size(LogicalSize::new(600, 400))
         .with_min_inner_size(LogicalSize::new(600, 400))
