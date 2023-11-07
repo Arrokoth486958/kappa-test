@@ -1,0 +1,32 @@
+[package]
+name = "kappa"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+env_logger = "0.10"
+log = "0.4"
+window-vibrancy = "0.4"
+raw-window-handle = "0.5"
+pollster = "0.3"
+rust-embed = "6.0"
+bytemuck = { version = "1.14", features = [ "derive" ] }
+glyphon = { git = "https://github.com/Arrokoth486958/glyphon.git" }
+
+[dependencies.image]
+version = "0.24"
+default-features = true
+features = ["png", "jpeg"]
+
+[dependencies.wgpu]
+version = "0.17.1"
+features = ["default", "glsl"]
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc = "0.2"
+cocoa = "0.25.0"
+
+[dependencies.winit]
+features = ["rwh_05"]
