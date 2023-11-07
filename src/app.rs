@@ -1,9 +1,42 @@
-use winit::{window::{Window, WindowBuilder}, event_loop::EventLoop};
+use winit::{window::{Window, WindowBuilder}, event_loop::EventLoop, event::{Event, WindowEvent}};
 
-pub struct Application {
-    window: Window,
-    event_loop: EventLoop<()>,
+pub struct Application<'a> {
+    window: &'a Window,
 }
 
-impl Application {
+impl<'a> Application<'a> {
+    pub fn new(window: &'a Window) -> Self {        
+        Application {
+            window
+        }
+    }
+
+    pub fn on_loop(&mut self, event: Event<()>, elwt: &winit::event_loop::EventLoopWindowTarget<()>) {
+        match event {
+            Event::WindowEvent {
+                ref event,
+                window_id,
+            } => {
+                if window_id == self.window.id() {
+                    match event {
+                        WindowEvent::CloseRequested => {
+                            elwt.exit();
+                        }
+                        WindowEvent::Resized(size) => {
+                            #[cfg(target_os = "macos")]
+                            self.window.request_redraw();
+                        }
+                        WindowEvent::ScaleFactorChanged { .. } => {
+                        }
+                        WindowEvent::KeyboardInput { .. } => {
+                        }
+                        WindowEvent::RedrawRequested => {
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
 }

@@ -1,3 +1,4 @@
+use kappa::app::Application;
 use winit::{window::{WindowBuilder, WindowButtons}, dpi::LogicalSize, event_loop::EventLoop};
 
 fn main() {
@@ -9,10 +10,11 @@ fn main() {
         .with_title("Kappa")
         .with_visible(false);
     let window = window_builder.build(&event_loop).unwrap();
+    let mut app = Application::new(&window);
 
     window.set_visible(true);
-    event_loop.run(move |event, elwt|
+    event_loop.run(move |event, elwt: &winit::event_loop::EventLoopWindowTarget<()>| {
         // TODO: 你好
-        println!("阿米诺斯")
-    ).unwrap();
+        app.on_loop(event, elwt);
+    }).unwrap();
 }
