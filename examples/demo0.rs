@@ -1,5 +1,9 @@
 use kappa::app::Application;
-use winit::{window::{WindowBuilder, WindowButtons}, dpi::LogicalSize, event_loop::EventLoop};
+use winit::{
+    dpi::LogicalSize,
+    event_loop::EventLoop,
+    window::{WindowBuilder, WindowButtons},
+};
 
 fn main() {
     let event_loop = EventLoop::new().unwrap();
@@ -13,8 +17,12 @@ fn main() {
     let mut app = Application::new(&window);
 
     window.set_visible(true);
-    event_loop.run(move |event, elwt: &winit::event_loop::EventLoopWindowTarget<()>| {
-        // TODO: 你好
-        app.on_loop(event, elwt);
-    }).unwrap();
+    event_loop
+        .run(
+            move |event, elwt: &winit::event_loop::EventLoopWindowTarget<()>| {
+                // TODO: 你好
+                app.on_loop(event, elwt);
+            },
+        )
+        .unwrap();
 }

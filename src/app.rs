@@ -1,4 +1,8 @@
-use winit::{window::{Window, WindowBuilder}, event_loop::EventLoop, event::{Event, WindowEvent}};
+use winit::{
+    event::{Event, WindowEvent},
+    event_loop::EventLoop,
+    window::{Window, WindowBuilder},
+};
 
 use crate::wgpu::RenderInstance;
 
@@ -17,7 +21,11 @@ impl<'a> Application<'a> {
         }
     }
 
-    pub fn on_loop(&mut self, event: Event<()>, elwt: &winit::event_loop::EventLoopWindowTarget<()>) {
+    pub fn on_loop(
+        &mut self,
+        event: Event<()>,
+        elwt: &winit::event_loop::EventLoopWindowTarget<()>,
+    ) {
         match event {
             Event::WindowEvent {
                 ref event,
@@ -32,12 +40,9 @@ impl<'a> Application<'a> {
                             #[cfg(target_os = "macos")]
                             self.window.request_redraw();
                         }
-                        WindowEvent::ScaleFactorChanged { .. } => {
-                        }
-                        WindowEvent::KeyboardInput { .. } => {
-                        }
-                        WindowEvent::RedrawRequested => {
-                        }
+                        WindowEvent::ScaleFactorChanged { .. } => {}
+                        WindowEvent::KeyboardInput { .. } => {}
+                        WindowEvent::RedrawRequested => {}
                         _ => {}
                     }
                 }
