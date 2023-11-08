@@ -1,0 +1,7 @@
+[2023-11-08T20:32:04] [INFO] [demo0]: Initializing Kappa...
+[2023-11-08T20:32:05] [WARN] [wgpu_hal::vulkan::instance]: InstanceFlags::VALIDATION requested, but unable to find layer: VK_LAYER_KHRONOS_validation
+[2023-11-08T20:32:05] [INFO] [wgpu_hal::vulkan::instance]: Instance version: 0x4030f1
+[2023-11-08T20:32:05] [INFO] [wgpu_hal::vulkan::instance]: Debug utils not enabled: debug_utils_user_data not passed to Instance::from_raw
+[2023-11-08T20:32:05] [INFO] [wgpu_hal::vulkan::instance]: Enabling device properties2
+[2023-11-08T20:32:05] [INFO] [wgpu_hal::gles::egl]: Unable to open libEGL: Library(LoadLibraryExW { source: Os { code: 126, kind: Uncategorized, message: "找不到指定的模块。" } })
+[2023-11-08T20:32:05] [INFO] [wgpu_core::instance]: Adapter Vulkan AdapterInfo { name: "NVIDIA GeForce RTX 3090 Ti", vendor: 4318, device: 8707, device_type: DiscreteGpu, driver: "NVIDIA", driver_info: "537.34", backend: Vulkan }
