@@ -1,4 +1,4 @@
-use wgpu::{Backends, Instance, InstanceDescriptor, RequestAdapterOptions, Backend};
+use wgpu::{Backend, Backends, Instance, InstanceDescriptor, RequestAdapterOptions};
 use winit::window::Window;
 
 pub struct RenderInstance {
@@ -15,20 +15,21 @@ impl RenderInstance {
 
         let surface =
             unsafe { wgpu_instance.create_surface(window) }.expect("Could not create a Surface!");
-        
+
         // TODO: 支持Backend优先级
-        let adapter = wgpu_instance.request_adapter(&RequestAdapterOptions {
-            compatible_surface: Some(&surface),
-            power_preference: wgpu::PowerPreference::default(),
-            force_fallback_adapter: false,
-        }).await.unwrap();
+        let adapter = wgpu_instance
+            .request_adapter(&RequestAdapterOptions {
+                compatible_surface: Some(&surface),
+                power_preference: wgpu::PowerPreference::default(),
+                force_fallback_adapter: false,
+            })
+            .await
+            .unwrap();
 
         // log::info!("1");
 
-        // let 
+        // let
 
-        RenderInstance {
-            wgpu_instance,
-        }
+        RenderInstance { wgpu_instance }
     }
 }

@@ -1,4 +1,5 @@
 use kappa::app::Application;
+use log::info;
 use winit::{
     dpi::LogicalSize,
     event_loop::EventLoop,
@@ -7,6 +8,8 @@ use winit::{
 
 fn main() {
     kappa::log::init();
+
+    info!("Initializing Kappa...");
 
     let event_loop = EventLoop::new().unwrap();
     let window_builder = WindowBuilder::new()
