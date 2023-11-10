@@ -1,11 +1,11 @@
 use winit::{
     event::{Event, WindowEvent},
-    event_loop::EventLoop,
-    window::{Window, WindowBuilder},
+    window::Window,
 };
 
 use crate::wgpu::RenderInstance;
 
+#[allow(dead_code)]
 pub struct Application<'a> {
     render_instance: RenderInstance,
     window: &'a Window,
@@ -36,7 +36,7 @@ impl<'a> Application<'a> {
                         WindowEvent::CloseRequested => {
                             elwt.exit();
                         }
-                        WindowEvent::Resized(size) => {
+                        WindowEvent::Resized(_size) => {
                             #[cfg(target_os = "macos")]
                             self.window.request_redraw();
                         }
