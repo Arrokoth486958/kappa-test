@@ -1,6 +1,6 @@
 use wgpu::{
-    Backends, CompositeAlphaMode, DeviceDescriptor, Features, Instance,
-    InstanceDescriptor, Limits, RequestAdapterOptions, SurfaceConfiguration, TextureUsages,
+    Backends, CompositeAlphaMode, DeviceDescriptor, Features, Instance, InstanceDescriptor, Limits,
+    RequestAdapterOptions, SurfaceConfiguration, TextureUsages,
 };
 use winit::window::Window;
 
@@ -54,7 +54,7 @@ impl RenderInstance {
         } else {
             caps.alpha_modes[0]
         };
-        
+
         let config = SurfaceConfiguration {
             usage: TextureUsages::RENDER_ATTACHMENT,
             format: caps.formats[0],
