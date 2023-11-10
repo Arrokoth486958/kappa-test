@@ -60,11 +60,7 @@ pub fn init() -> Result<(), Box<dyn std::error::Error>> {
             Appender::builder().build("console", Box::new(console_appender)),
             Appender::builder().build("logfile", Box::new(file_appender)),
         ])
-        .build(
-            Root::builder()
-                .appenders(vec!["logfile", "console"])
-                .build(log::LevelFilter::Info),
-        )?;
+        .build(Root::builder().appenders(vec!["logfile", "console"]))?;
 
     log4rs::init_config(config)?;
 

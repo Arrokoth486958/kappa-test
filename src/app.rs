@@ -3,7 +3,7 @@ use winit::{
     window::Window,
 };
 
-use crate::{wgpu::RenderInstance, renderer::RenderSystem};
+use crate::{renderer::RenderSystem, wgpu::RenderInstance};
 
 #[allow(dead_code)]
 pub struct Application<'a> {

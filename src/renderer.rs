@@ -7,8 +7,6 @@ pub struct RenderSystem<'a> {
 
 impl<'a> RenderSystem<'a> {
     pub fn new(instance: &'a RenderInstance) -> Result<Self, Box<dyn std::error::Error>> {
-        Ok(RenderSystem {
-            instance,
-        })
+        Ok(RenderSystem { instance })
     }
 }
