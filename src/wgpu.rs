@@ -1,4 +1,7 @@
-use wgpu::{Backend, Backends, Instance, InstanceDescriptor, RequestAdapterOptions};
+use wgpu::{
+    Backends, CompositeAlphaMode, DeviceDescriptor, Features, Instance,
+    InstanceDescriptor, Limits, RequestAdapterOptions, SurfaceConfiguration, TextureUsages,
+};
 use winit::window::Window;
 
 pub struct RenderInstance {
@@ -7,6 +10,8 @@ pub struct RenderInstance {
 
 impl RenderInstance {
     pub async fn new(window: &Window) -> Self {
+        let size = window.inner_size();
+
         let wgpu_instance = Instance::new(InstanceDescriptor {
             backends: Backends::all(),
             // backends: Backends::DX11 | Backends::DX12 | Backends::METAL | Backends::VULKAN | Backends::GL,
@@ -26,9 +31,40 @@ impl RenderInstance {
             .await
             .unwrap();
 
-        // log::info!("1");
+        let (device, queue) = adapter
+            .request_device(
+                &DeviceDescriptor {
+                    label: None,
+                    features: Features::default(),
+                    limits: Limits::downlevel_defaults(),
+                },
+                None,
+            )
+            .await
+            .unwrap();
 
-        // let
+        let caps = surface.get_capabilities(&adapter);
+
+        // TODO: 更好，更强，更壮（指选择alpha channel
+        let alpha_channel = if caps
+            .alpha_modes
+            .contains(&CompositeAlphaMode::PostMultiplied)
+        {
+            CompositeAlphaMode::PostMultiplied
+        } else {
+            caps.alpha_modes[0]
+        };
+        
+        let config = SurfaceConfiguration {
+            usage: TextureUsages::RENDER_ATTACHMENT,
+            format: caps.formats[0],
+            width: size.width,
+            height: size.height,
+            present_mode: wgpu::PresentMode::Fifo,
+            alpha_mode: alpha_channel,
+            view_formats: vec![],
+        };
+        surface.configure(&device, &config);
 
         RenderInstance { wgpu_instance }
     }
