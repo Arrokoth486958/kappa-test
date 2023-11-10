@@ -4,7 +4,7 @@ use chrono::{DateTime, Local};
 use env_logger::Builder;
 use log::info;
 use log4rs::{
-    append::{file::FileAppender, console::ConsoleAppender},
+    append::{console::ConsoleAppender, file::FileAppender},
     config::{Appender, Root},
     encode::pattern::PatternEncoder,
     Config,
@@ -48,7 +48,7 @@ pub fn init() -> Result<(), Box<dyn std::error::Error>> {
             "[{d(%Y-%m-%dT%H:%M:%S)}] [{l}] [{t}]: {m}{n}",
         )))
         .build("logs/latest.log")?;
-    
+
     let console_appender = ConsoleAppender::builder()
         .encoder(Box::new(PatternEncoder::new(
             "[{d(%Y-%m-%dT%H:%M:%S)}] [{l}] [{t}]: {m}{n}",
@@ -56,7 +56,10 @@ pub fn init() -> Result<(), Box<dyn std::error::Error>> {
         .build();
 
     let config = Config::builder()
-        .appenders(vec![Appender::builder().build("console", Box::new(console_appender)), Appender::builder().build("logfile", Box::new(file_appender))])
+        .appenders(vec![
+            Appender::builder().build("console", Box::new(console_appender)),
+            Appender::builder().build("logfile", Box::new(file_appender)),
+        ])
         .build(
             Root::builder()
                 .appenders(vec!["logfile", "console"])
@@ -64,7 +67,7 @@ pub fn init() -> Result<(), Box<dyn std::error::Error>> {
         )?;
 
     log4rs::init_config(config)?;
-    
+
     info!("Logging system initialized.");
     Ok(())
 }

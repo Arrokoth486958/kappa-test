@@ -7,9 +7,7 @@ pub struct KappaError {
 
 impl KappaError {
     pub fn new(info: impl Into<String>) -> Self {
-        KappaError {
-            info: info.into()
-        }
+        KappaError { info: info.into() }
     }
 }
 

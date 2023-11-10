@@ -1,14 +1,21 @@
 use wgpu::{
-    Backends, CompositeAlphaMode, DeviceDescriptor, Features, Instance, InstanceDescriptor, Limits,
-    RequestAdapterOptions, SurfaceConfiguration, TextureUsages,
+    Adapter, Backends, CompositeAlphaMode, Device, DeviceDescriptor, Features, Instance,
+    InstanceDescriptor, Limits, Queue, RequestAdapterOptions, Surface, SurfaceConfiguration,
+    TextureUsages,
 };
-use winit::window::Window;
+use winit::{dpi::PhysicalSize, window::Window};
 
 use crate::error::KappaError;
 
 #[allow(dead_code)]
 pub struct RenderInstance {
+    size: PhysicalSize<u32>,
     wgpu_instance: Instance,
+    surface: Surface,
+    adapter: Adapter,
+    device: Device,
+    queue: Queue,
+    config: SurfaceConfiguration,
 }
 
 // 一些可能用得上的东西：https://jinleili.github.io/learn-wgpu-zh
@@ -43,8 +50,7 @@ impl RenderInstance {
                 },
                 None,
             )
-            .await
-            ?;
+            .await?;
 
         let caps = surface.get_capabilities(&adapter);
 
@@ -63,12 +69,33 @@ impl RenderInstance {
             format: caps.formats[0],
             width: size.width,
             height: size.height,
-            present_mode: wgpu::PresentMode::Fifo,
+            present_mode: wgpu::PresentMode::Immediate,
             alpha_mode: alpha_channel,
             view_formats: vec![],
         };
         surface.configure(&device, &config);
 
-        Ok(RenderInstance { wgpu_instance })
+        Ok(RenderInstance {
+            size,
+            wgpu_instance,
+            adapter,
+            config,
+            device,
+            queue,
+            surface,
+        })
+    }
+
+    pub fn reconfigure(&mut self) {
+        self.surface.configure(&self.device, &self.config);
+    }
+
+    pub fn resize(&mut self, size: PhysicalSize<u32>) {
+        if size.width > 0 && size.height > 0 {
+            self.size = size;
+            self.config.width = size.width;
+            self.config.width = size.height;
+            self.reconfigure();
+        }
     }
 }

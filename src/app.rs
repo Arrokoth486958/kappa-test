@@ -3,7 +3,7 @@ use winit::{
     window::Window,
 };
 
-use crate::wgpu::RenderInstance;
+use crate::{wgpu::RenderInstance, renderer::RenderSystem};
 
 #[allow(dead_code)]
 pub struct Application<'a> {
@@ -14,6 +14,7 @@ pub struct Application<'a> {
 impl<'a> Application<'a> {
     pub fn new(window: &'a Window) -> Result<Self, Box<dyn std::error::Error>> {
         let render_instance = pollster::block_on(RenderInstance::new(window))?;
+        let renderer = RenderSystem::new(&render_instance)?;
 
         Ok(Application {
             window,
@@ -36,7 +37,8 @@ impl<'a> Application<'a> {
                         WindowEvent::CloseRequested => {
                             elwt.exit();
                         }
-                        WindowEvent::Resized(_size) => {
+                        WindowEvent::Resized(size) => {
+                            self.render_instance.resize(*size);
                             #[cfg(target_os = "macos")]
                             self.window.request_redraw();
                         }
