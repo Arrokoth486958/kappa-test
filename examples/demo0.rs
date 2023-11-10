@@ -7,7 +7,7 @@ use winit::{
 };
 
 fn main() {
-    kappa::log::init();
+    kappa::log::init().expect("Could not initialize logging system!");
 
     info!("Initializing Kappa...");
 
@@ -19,14 +19,17 @@ fn main() {
         .with_title("Kappa")
         .with_visible(false);
     let window = window_builder.build(&event_loop).unwrap();
-    let mut app = Application::new(&window);
+    let mut app = Application::new(&window).unwrap();
 
     window.set_visible(true);
     event_loop
         .run(
             move |event, elwt: &winit::event_loop::EventLoopWindowTarget<()>| {
                 // TODO: 你好
-                app.on_loop(event, elwt);
+                let result = app.on_loop(event, elwt);
+                if result.is_err() {
+                    log::error!("{}", result.err().unwrap().to_string());
+                }
             },
         )
         .unwrap();

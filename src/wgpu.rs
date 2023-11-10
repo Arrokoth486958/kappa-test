@@ -4,13 +4,15 @@ use wgpu::{
 };
 use winit::window::Window;
 
+use crate::error::{KappaError, self};
+
 #[allow(dead_code)]
 pub struct RenderInstance {
     wgpu_instance: Instance,
 }
 
 impl RenderInstance {
-    pub async fn new(window: &Window) -> Self {
+    pub async fn new(window: &Window) -> Result<Self, Box<dyn std::error::Error>> {
         let size = window.inner_size();
 
         let wgpu_instance = Instance::new(InstanceDescriptor {
@@ -30,7 +32,7 @@ impl RenderInstance {
                 force_fallback_adapter: false,
             })
             .await
-            .unwrap();
+            .ok_or(KappaError::new("Could not create an adapter"))?;
 
         let (device, queue) = adapter
             .request_device(
@@ -42,7 +44,7 @@ impl RenderInstance {
                 None,
             )
             .await
-            .unwrap();
+            ?;
 
         let caps = surface.get_capabilities(&adapter);
 
@@ -67,6 +69,6 @@ impl RenderInstance {
         };
         surface.configure(&device, &config);
 
-        RenderInstance { wgpu_instance }
+        Ok(RenderInstance { wgpu_instance })
     }
 }

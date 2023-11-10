@@ -12,20 +12,20 @@ pub struct Application<'a> {
 }
 
 impl<'a> Application<'a> {
-    pub fn new(window: &'a Window) -> Self {
-        let render_instance = pollster::block_on(RenderInstance::new(window));
+    pub fn new(window: &'a Window) -> Result<Self, Box<dyn std::error::Error>> {
+        let render_instance = pollster::block_on(RenderInstance::new(window))?;
 
-        Application {
+        Ok(Application {
             window,
             render_instance,
-        }
+        })
     }
 
     pub fn on_loop(
         &mut self,
         event: Event<()>,
         elwt: &winit::event_loop::EventLoopWindowTarget<()>,
-    ) {
+    ) -> Result<(), Box<dyn std::error::Error>> {
         match event {
             Event::WindowEvent {
                 ref event,
@@ -49,5 +49,6 @@ impl<'a> Application<'a> {
             }
             _ => {}
         }
+        Ok(())
     }
 }
