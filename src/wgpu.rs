@@ -4,6 +4,7 @@ use wgpu::{
 };
 use winit::window::Window;
 
+#[allow(dead_code)]
 pub struct RenderInstance {
     wgpu_instance: Instance,
 }

@@ -1,9 +1,8 @@
 use std::{fs::File, io::Write, path::Path};
 
 use chrono::{DateTime, Local};
-use env_logger::{fmt::Timestamp, Builder};
 use log4rs::{
-    append::{console::ConsoleAppender, file::FileAppender},
+    append::file::FileAppender,
     config::{Appender, Root},
     encode::pattern::PatternEncoder,
     Config,
@@ -22,11 +21,11 @@ pub fn init() {
 
         let mut i = 0;
         let mut last_file = File::create(format!("logs/{}.log", time));
-        while last_file.is_err() {
+        while last_file.is_err() || i < 16 {
             i += 1;
             last_file = File::create(format!("logs/{}-{}.log", time, i));
         }
-        
+
         let mut last_file = last_file.unwrap();
         last_file
             .write(&std::fs::read(log_path).unwrap())
