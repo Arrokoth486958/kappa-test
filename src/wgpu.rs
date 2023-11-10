@@ -4,20 +4,20 @@ use wgpu::{
 };
 use winit::window::Window;
 
-use crate::error::{KappaError, self};
+use crate::error::KappaError;
 
 #[allow(dead_code)]
 pub struct RenderInstance {
     wgpu_instance: Instance,
 }
 
+// 一些可能用得上的东西：https://jinleili.github.io/learn-wgpu-zh
 impl RenderInstance {
     pub async fn new(window: &Window) -> Result<Self, Box<dyn std::error::Error>> {
         let size = window.inner_size();
 
         let wgpu_instance = Instance::new(InstanceDescriptor {
             backends: Backends::all(),
-            // backends: Backends::DX11 | Backends::DX12 | Backends::METAL | Backends::VULKAN | Backends::GL,
             dx12_shader_compiler: Default::default(),
         });
 
