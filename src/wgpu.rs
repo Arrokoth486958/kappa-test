@@ -94,7 +94,7 @@ impl RenderInstance {
         if size.width > 0 && size.height > 0 {
             self.size = size;
             self.config.width = size.width;
-            self.config.width = size.height;
+            self.config.height = size.height;
             self.reconfigure();
         }
     }
