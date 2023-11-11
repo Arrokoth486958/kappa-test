@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use bytemuck::{Pod, Zeroable};
-use wgpu::{RenderPipeline, RenderPipelineDescriptor, PrimitiveState, PipelineLayoutDescriptor, Face, VertexState, VertexAttribute, VertexBufferLayout, BufferAddress, FragmentState, ColorTargetState, BlendState, ColorWrites, MultisampleState, PipelineLayout, include_wgsl, ShaderModuleDescriptor, RenderPassDescriptor, RenderPassColorAttachment, Operations, LoadOp, Color, RenderPass};
+use wgpu::{RenderPipeline, RenderPipelineDescriptor, PrimitiveState, PipelineLayoutDescriptor, Face, VertexState, VertexAttribute, VertexBufferLayout, BufferAddress, FragmentState, ColorTargetState, BlendState, ColorWrites, MultisampleState, include_wgsl, RenderPass};
 
 use crate::wgpu::RenderInstance;
 
@@ -47,7 +47,7 @@ impl RenderSystem {
             bind_group_layouts: &[],
             push_constant_ranges: &[],
         });
-        let pipeline = instance.device.create_render_pipeline(&RenderPipelineDescriptor {
+        let _pipeline = instance.device.create_render_pipeline(&RenderPipelineDescriptor {
             label: Some("Render Pipeline"),
             depth_stencil: None,
             layout: Some(&pipeline_layout),
@@ -88,7 +88,7 @@ impl RenderSystem {
         })
     }
 
-    pub fn render(&mut self, render_pass: &mut RenderPass) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn render(&mut self, _render_pass: &mut RenderPass) -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 }

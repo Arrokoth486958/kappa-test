@@ -47,7 +47,7 @@ impl<'a> Application<'a> {
                         WindowEvent::ScaleFactorChanged { .. } => {}
                         WindowEvent::KeyboardInput { .. } => {}
                         WindowEvent::RedrawRequested => {
-                            self.render_instance.render(&mut self.render_system);
+                            self.render_instance.render(&mut self.render_system)?;
                         }
                         _ => {}
                     }
