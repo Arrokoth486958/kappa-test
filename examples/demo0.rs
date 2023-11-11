@@ -2,7 +2,7 @@ use kappa::app::Application;
 use log::info;
 use winit::{
     dpi::LogicalSize,
-    event_loop::EventLoop,
+    event_loop::{EventLoop, ControlFlow},
     window::{WindowBuilder, WindowButtons},
 };
 
@@ -22,10 +22,10 @@ fn main() {
     let mut app = Application::new(&window).unwrap();
 
     window.set_visible(true);
+    event_loop.set_control_flow(ControlFlow::Wait);
     event_loop
         .run(
             move |event, elwt: &winit::event_loop::EventLoopWindowTarget<()>| {
-                // TODO: 你好
                 let result = app.on_loop(event, elwt);
                 if result.is_err() {
                     log::error!("{}", result.err().unwrap().to_string());
