@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use bytemuck::{Pod, Zeroable};
-use wgpu::{RenderPipeline, RenderPipelineDescriptor, PrimitiveState, PipelineLayoutDescriptor, Face, VertexState, VertexAttribute, VertexBufferLayout, BufferAddress, FragmentState, ColorTargetState, BlendState, ColorWrites, MultisampleState, PipelineLayout, include_wgsl, ShaderModuleDescriptor, RenderPassDescriptor, RenderPassColorAttachment, Operations, LoadOp, Color};
+use wgpu::{RenderPipeline, RenderPipelineDescriptor, PrimitiveState, PipelineLayoutDescriptor, Face, VertexState, VertexAttribute, VertexBufferLayout, BufferAddress, FragmentState, ColorTargetState, BlendState, ColorWrites, MultisampleState, PipelineLayout, include_wgsl, ShaderModuleDescriptor, RenderPassDescriptor, RenderPassColorAttachment, Operations, LoadOp, Color, RenderPass};
 
 use crate::wgpu::RenderInstance;
 
@@ -27,13 +27,12 @@ impl Vertex {
 }
 
 #[allow(dead_code)]
-pub struct RenderSystem<'a> {
-    instance: &'a RenderInstance,
-    pipelines: HashMap<&'a str, Arc<RenderPipeline>>,
+pub struct RenderSystem {
+    pipelines: HashMap<String, Arc<RenderPipeline>>,
 }
 
-impl<'a> RenderSystem<'a> {
-    pub fn new(instance: &'a RenderInstance) -> Result<Self, Box<dyn std::error::Error>> {
+impl RenderSystem {
+    pub fn new(instance: &RenderInstance) -> Result<Self, Box<dyn std::error::Error>> {
         // 渲染管线
         let pipelines = HashMap::new();
 
@@ -85,46 +84,11 @@ impl<'a> RenderSystem<'a> {
         });
 
         Ok(RenderSystem {
-            instance,
             pipelines,
         })
     }
 
-    pub fn render(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        let output = self.instance.surface.get_current_texture()?;
-        let view = output
-            .texture
-            .create_view(&wgpu::TextureViewDescriptor::default());
-        let mut encoder = self
-            .instance
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("Render Encoder"),
-            });
-        
-        {
-            let render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
-                label: Some("Render Pass"),
-                color_attachments: &[Some(RenderPassColorAttachment {
-                    view: &view,
-                    resolve_target: None,
-                    ops: Operations {
-                        load: LoadOp::Clear(Color {
-                            r: 0.0,
-                            g: 0.0,
-                            b: 0.0,
-                            a: 0.0,
-                        }),
-                        store: true,
-                    },
-                })],
-                depth_stencil_attachment: None,
-            });
-        }
-
-        self.instance.queue.submit(Some(encoder.finish()));
-        output.present();
-
+    pub fn render(&mut self, render_pass: &mut RenderPass) -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 }

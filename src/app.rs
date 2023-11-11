@@ -8,17 +8,19 @@ use crate::{renderer::RenderSystem, wgpu::RenderInstance};
 #[allow(dead_code)]
 pub struct Application<'a> {
     render_instance: RenderInstance,
+    render_system: RenderSystem,
     window: &'a Window,
 }
 
 impl<'a> Application<'a> {
     pub fn new(window: &'a Window) -> Result<Self, Box<dyn std::error::Error>> {
         let render_instance = pollster::block_on(RenderInstance::new(window))?;
-        let renderer = RenderSystem::new(&render_instance)?;
+        let render_system = RenderSystem::new(&render_instance)?;
 
         Ok(Application {
-            window,
             render_instance,
+            render_system,
+            window,
         })
     }
 
@@ -44,7 +46,9 @@ impl<'a> Application<'a> {
                         }
                         WindowEvent::ScaleFactorChanged { .. } => {}
                         WindowEvent::KeyboardInput { .. } => {}
-                        WindowEvent::RedrawRequested => {}
+                        WindowEvent::RedrawRequested => {
+                            self.render_instance.render(&mut self.render_system);
+                        }
                         _ => {}
                     }
                 }

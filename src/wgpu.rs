@@ -1,11 +1,11 @@
 use wgpu::{
     Adapter, Backends, CompositeAlphaMode, Device, DeviceDescriptor, Features, Instance,
     InstanceDescriptor, Limits, Queue, RequestAdapterOptions, Surface, SurfaceConfiguration,
-    TextureUsages,
+    TextureUsages, RenderPassDescriptor, RenderPassColorAttachment, Operations, LoadOp, Color,
 };
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::error::KappaError;
+use crate::{error::KappaError, renderer::RenderSystem};
 
 #[allow(dead_code)]
 pub struct RenderInstance {
@@ -97,5 +97,44 @@ impl RenderInstance {
             self.config.height = size.height;
             self.reconfigure();
         }
+    }
+
+    pub fn render(&mut self, render_system: &mut RenderSystem) -> Result<(), Box<dyn std::error::Error>> {
+        let output = self.surface.get_current_texture()?;
+        let view = output
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Render Encoder"),
+            });
+        
+        {
+            let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
+                label: Some("Render Pass"),
+                color_attachments: &[Some(RenderPassColorAttachment {
+                    view: &view,
+                    resolve_target: None,
+                    ops: Operations {
+                        load: LoadOp::Clear(Color {
+                            r: 0.0,
+                            g: 0.0,
+                            b: 0.0,
+                            a: 0.0,
+                        }),
+                        store: true,
+                    },
+                })],
+                depth_stencil_attachment: None,
+            });
+
+            render_system.render(&mut render_pass)?;
+        }
+
+        self.queue.submit(Some(encoder.finish()));
+        output.present();
+
+        Ok(())
     }
 }
