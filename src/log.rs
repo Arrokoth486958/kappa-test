@@ -1,11 +1,11 @@
 use std::{fs::File, io::Write, path::Path};
 
 use chrono::{DateTime, Local};
-use env_logger::Builder;
-use log::info;
+use env_logger::{filter::Filter, Builder};
+use log::{info, Record};
 use log4rs::{
     append::{console::ConsoleAppender, file::FileAppender},
-    config::{Appender, Root},
+    config::{Appender, Logger, Root},
     encode::pattern::PatternEncoder,
     Config,
 };
@@ -63,7 +63,7 @@ pub fn init() -> Result<(), Box<dyn std::error::Error>> {
         .build(
             Root::builder()
                 .appenders(vec!["logfile", "console"])
-                .build(log::LevelFilter::Warn),
+                .build(log::LevelFilter::Info),
         )?;
 
     log4rs::init_config(config)?;

@@ -9,13 +9,13 @@ use crate::error::KappaError;
 
 #[allow(dead_code)]
 pub struct RenderInstance {
-    size: PhysicalSize<u32>,
-    wgpu_instance: Instance,
-    surface: Surface,
-    adapter: Adapter,
-    device: Device,
-    queue: Queue,
-    config: SurfaceConfiguration,
+    pub(crate) size: PhysicalSize<u32>,
+    pub(crate) wgpu_instance: Instance,
+    pub(crate) surface: Surface,
+    pub(crate) adapter: Adapter,
+    pub(crate) device: Device,
+    pub(crate) queue: Queue,
+    pub(crate) config: SurfaceConfiguration,
 }
 
 // 一些可能用得上的东西：https://jinleili.github.io/learn-wgpu-zh

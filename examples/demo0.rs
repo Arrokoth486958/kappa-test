@@ -2,7 +2,7 @@ use kappa::app::Application;
 use log::info;
 use winit::{
     dpi::LogicalSize,
-    event_loop::{EventLoop, ControlFlow},
+    event_loop::{ControlFlow, EventLoop},
     window::{WindowBuilder, WindowButtons},
 };
 
