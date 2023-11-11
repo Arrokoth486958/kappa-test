@@ -101,6 +101,7 @@ impl<'a> RenderSystem<'a> {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("Render Encoder"),
             });
+        
         let render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
             label: Some("Render Pass"),
             color_attachments: &[Some(RenderPassColorAttachment {
@@ -118,6 +119,10 @@ impl<'a> RenderSystem<'a> {
             })],
             depth_stencil_attachment: None,
         });
+
+        self.instance.queue.submit(Some(encoder.finish()));
+        output.present();
+
         Ok(())
     }
 }
