@@ -1,11 +1,9 @@
 use std::{fs::File, io::Write, path::Path};
 
 use chrono::{DateTime, Local};
-use env_logger::{filter::Filter, Builder};
-use log::{info, Record};
 use log4rs::{
     append::{console::ConsoleAppender, file::FileAppender},
-    config::{Appender, Logger, Root},
+    config::{Appender, Root},
     encode::pattern::PatternEncoder,
     Config,
 };
@@ -68,6 +66,5 @@ pub fn init() -> Result<(), Box<dyn std::error::Error>> {
 
     log4rs::init_config(config)?;
 
-    info!("Logging system initialized.");
     Ok(())
 }
