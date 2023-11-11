@@ -102,23 +102,25 @@ impl<'a> RenderSystem<'a> {
                 label: Some("Render Encoder"),
             });
         
-        let render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
-            label: Some("Render Pass"),
-            color_attachments: &[Some(RenderPassColorAttachment {
-                view: &view,
-                resolve_target: None,
-                ops: Operations {
-                    load: LoadOp::Clear(Color {
-                        r: 0.0,
-                        g: 0.0,
-                        b: 0.0,
-                        a: 0.0,
-                    }),
-                    store: true,
-                },
-            })],
-            depth_stencil_attachment: None,
-        });
+        {
+            let render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
+                label: Some("Render Pass"),
+                color_attachments: &[Some(RenderPassColorAttachment {
+                    view: &view,
+                    resolve_target: None,
+                    ops: Operations {
+                        load: LoadOp::Clear(Color {
+                            r: 0.0,
+                            g: 0.0,
+                            b: 0.0,
+                            a: 0.0,
+                        }),
+                        store: true,
+                    },
+                })],
+                depth_stencil_attachment: None,
+            });
+        }
 
         self.instance.queue.submit(Some(encoder.finish()));
         output.present();
