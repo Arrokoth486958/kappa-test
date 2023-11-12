@@ -1,11 +1,52 @@
+use std::collections::HashMap;
+
+use bytemuck::{Zeroable, Pod};
 use wgpu::{
     Adapter, Backends, CompositeAlphaMode, Device, DeviceDescriptor, Features, Instance,
     InstanceDescriptor, Limits, Queue, RequestAdapterOptions, Surface, SurfaceConfiguration,
-    TextureUsages, RenderPassDescriptor, RenderPassColorAttachment, Operations, LoadOp, Color,
+    TextureUsages, RenderPassDescriptor, RenderPassColorAttachment, Operations, LoadOp, Color, RenderPipeline, RenderPass, include_wgsl, PipelineLayoutDescriptor, RenderPipelineDescriptor, VertexState, FragmentState, ColorTargetState, BlendState, ColorWrites, PrimitiveState, MultisampleState, Face, VertexAttribute, VertexBufferLayout, BufferAddress, util::DeviceExt, Buffer,
 };
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::{error::KappaError, renderer::RenderSystem};
+use crate::{error::KappaError, cache};
+
+static mut VERTEX_BUFFERS: Vec<Buffer> = Vec::new();
+static mut INDEX_BUFFERS: Vec<Buffer> = Vec::new();
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Vertex {
+    pub position: [f32; 3],
+    pub color: [f32; 3],
+    pub tex_coords: [f32; 2],
+}
+
+impl Vertex {
+    const ATTRIBS: [VertexAttribute; 3] =
+        wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x2];
+
+    pub fn desc<'a>() -> VertexBufferLayout<'a> {
+        VertexBufferLayout {
+            array_stride: std::mem::size_of::<Vertex>() as BufferAddress,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &Self::ATTRIBS,
+        }
+    }
+}
+
+pub struct RenderObject {
+    vertex_addr: usize,
+    index_addr: usize,
+}
+
+impl RenderObject {
+    pub fn new(vertex: Vec<Vertex>, index: Vec<u16>) -> RenderObject {
+        RenderObject {
+            vertex_addr: cache::alloc_vertex(vertex),
+            index_addr: cache::alloc_index(index),
+        }
+    }
+}
 
 #[allow(dead_code)]
 pub struct RenderInstance {
@@ -16,6 +57,8 @@ pub struct RenderInstance {
     pub(crate) device: Device,
     pub(crate) queue: Queue,
     pub(crate) config: SurfaceConfiguration,
+    pub(crate) pipelines: HashMap<String, RenderPipeline>,
+    pub(crate) render_objects: Vec<RenderObject>,
 }
 
 // 一些可能用得上的东西：https://jinleili.github.io/learn-wgpu-zh
@@ -75,6 +118,87 @@ impl RenderInstance {
         };
         surface.configure(&device, &config);
 
+        let mut pipelines = HashMap::new();
+        // let shader = instance.device.create_shader_module(ShaderModuleDescriptor {
+        //     label: Some("Position Color Shader"),
+        //     source: include_wgsl!("position_color.wgsl"),
+        // });
+        let shader = device.create_shader_module(include_wgsl!("position_color.wgsl"));
+
+        let pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
+            label: Some("Position Color Pipeline Layout"),
+            bind_group_layouts: &[],
+            push_constant_ranges: &[],
+        });
+        let pipeline = device.create_render_pipeline(&RenderPipelineDescriptor {
+            label: Some("Render Pipeline"),
+            depth_stencil: None,
+            layout: Some(&pipeline_layout),
+            vertex: VertexState {
+                module: &shader,
+                entry_point: "vs_main",
+                buffers: &[Vertex::desc()],
+            },
+            fragment: Some(FragmentState {
+                module: &shader,
+                entry_point: "fs_main",
+                targets: &[Some(ColorTargetState {
+                    format: config.format,
+                    blend: Some(BlendState::PREMULTIPLIED_ALPHA_BLENDING),
+                    write_mask: ColorWrites::all(),
+                })],
+            }),
+            primitive: PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleList,
+                strip_index_format: None,
+                // 剔除部分
+                front_face: wgpu::FrontFace::Cw,
+                cull_mode: Some(Face::Back),
+                polygon_mode: wgpu::PolygonMode::Fill,
+                unclipped_depth: false,
+                conservative: false,
+            },
+            multisample: MultisampleState {
+                count: 1,
+                mask: !0,
+                alpha_to_coverage_enabled: false,
+            },
+            multiview: None,
+        });
+        pipelines.insert("position_color".into(), pipeline);
+
+        let mut render_objects =  Vec::new();
+
+        // TODO: Debug
+        render_objects.push(RenderObject::new(
+            vec![
+                Vertex {
+                    position: [0.0, 0.0, 0.0],
+                    color: [1.0, 1.0, 1.0],
+                    tex_coords: [0.0, 0.0],
+                },
+                Vertex {
+                    position: [1.0, 0.0, 0.0],
+                    color: [1.0, 1.0, 1.0],
+                    tex_coords: [0.0, 0.0],
+                },
+                Vertex {
+                    position: [1.0, 1.0, 0.0],
+                    color: [1.0, 1.0, 1.0],
+                    tex_coords: [0.0, 0.0],
+                },
+                Vertex {
+                    position: [0.0, 1.0, 0.0],
+                    color: [1.0, 1.0, 1.0],
+                    tex_coords: [0.0, 0.0],
+                },
+            ],
+            vec![
+                0, 1, 2,
+                2, 3, 1,
+            ]
+        ));
+
         Ok(RenderInstance {
             size,
             wgpu_instance,
@@ -83,6 +207,8 @@ impl RenderInstance {
             device,
             queue,
             surface,
+            pipelines,
+            render_objects,
         })
     }
 
@@ -99,7 +225,7 @@ impl RenderInstance {
         }
     }
 
-    pub fn render(&mut self, render_system: &mut RenderSystem) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn render(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let output = self.surface.get_current_texture()?;
         let view = output
             .texture
@@ -128,8 +254,45 @@ impl RenderInstance {
                 })],
                 depth_stencil_attachment: None,
             });
+            for obj in &self.render_objects {
+                unsafe {
+                        let vertex_buffer =
+                            self.device
+                                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                                    label: None,
+                                    // contents: bytemuck::cast_slice(obj.vertex),
+                                    // contents: bytemuck::cast_slice(cache::get_vertex(
+                                    //     obj.vertex_addr,
+                                    // )),
+                                    contents: bytemuck::cast_slice(
+                                        cache::get_vertex(obj.vertex_addr).as_slice()
+                                    ),
+                                    usage: wgpu::BufferUsages::VERTEX,
+                                });
 
-            render_system.render(&mut render_pass)?;
+                        let index_buffer =
+                            self.device
+                                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                                    label: None,
+                                    contents: bytemuck::cast_slice(cache::get_index(
+                                        obj.index_addr,
+                                    )),
+                                    usage: wgpu::BufferUsages::INDEX,
+                                });
+                        // 所有权转移
+                        VERTEX_BUFFERS.push(vertex_buffer);
+                        INDEX_BUFFERS.push(index_buffer);
+                }
+
+                render_pass.set_pipeline(self.pipelines.get("position_color".into()).unwrap());
+                // render_pass.set_pipeline(self.pipelines.get("position_color").unwrap().as_ref());
+
+                render_pass.draw_indexed(
+                    0..cache::get_index(obj.index_addr).len() as u32, 
+                    0, 
+                    0..1
+                );
+            }
         }
 
         self.queue.submit(Some(encoder.finish()));

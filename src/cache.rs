@@ -1,6 +1,6 @@
-use crate::renderer::Vertex;
+use crate::wgpu::Vertex;
 
-// Vertex
+// Vertex缓存
 static mut VERTEX_CACHE: Vec<Vec<Vertex>> = Vec::new();
 
 pub fn alloc_vertex(vertex: Vec<Vertex>) -> usize {
@@ -20,7 +20,7 @@ pub fn clear_vertex() {
     }
 }
 
-// Index
+// Index缓存
 static mut INDEX_CACHE: Vec<Vec<u16>> = Vec::new();
 
 pub fn alloc_index(index: Vec<u16>) -> usize {
