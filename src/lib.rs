@@ -3,5 +3,4 @@ pub mod app;
 pub mod cache;
 pub mod error;
 pub mod log;
-pub mod renderer;
-pub mod wgpu;
+pub mod render;

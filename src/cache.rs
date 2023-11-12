@@ -1,4 +1,4 @@
-use crate::wgpu::Vertex;
+use crate::render::Vertex;
 
 // Vertex缓存
 static mut VERTEX_CACHE: Vec<Vec<Vertex>> = Vec::new();

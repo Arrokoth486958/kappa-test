@@ -6,23 +6,20 @@ use winit::{
     window::Window,
 };
 
-use crate::{renderer::RenderSystem, wgpu::RenderInstance};
+use crate::render::RenderInstance;
 
 #[allow(dead_code)]
 pub struct Application<'a> {
     render_instance: RenderInstance,
-    render_system: RenderSystem,
     window: &'a Window,
 }
 
 impl<'a> Application<'a> {
     pub fn new(window: &'a Window) -> Result<Self, Box<dyn std::error::Error>> {
         let render_instance = pollster::block_on(RenderInstance::new(window))?;
-        let render_system = RenderSystem::new(&render_instance)?;
 
         Ok(Application {
             render_instance,
-            render_system,
             window,
         })
     }
