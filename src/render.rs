@@ -7,7 +7,8 @@ use wgpu::{
     FragmentState, Instance, InstanceDescriptor, Limits, LoadOp, MultisampleState, Operations,
     PipelineLayoutDescriptor, PrimitiveState, Queue, RenderPassColorAttachment,
     RenderPassDescriptor, RenderPipeline, RenderPipelineDescriptor, RequestAdapterOptions, Surface,
-    SurfaceConfiguration, TextureUsages, VertexAttribute, VertexBufferLayout, VertexState, TextureFormat,
+    SurfaceConfiguration, TextureFormat, TextureUsages, VertexAttribute, VertexBufferLayout,
+    VertexState,
 };
 use winit::{dpi::PhysicalSize, window::Window};
 
@@ -219,10 +220,7 @@ impl RenderInstance {
                     tex_coords: [0.0, 0.0],
                 },
             ],
-            vec![
-                0, 1, 2,
-                2, 3, 0,
-            ],
+            vec![0, 1, 2, 2, 3, 0],
         ));
 
         Ok(RenderInstance {
@@ -306,10 +304,23 @@ impl RenderInstance {
                     VERTEX_BUFFERS.push(vertex_buffer);
                     INDEX_BUFFERS.push(index_buffer);
 
-                    render_pass.set_pipeline(self.pipelines.get("position_color".into()).ok_or(KappaError::new("Unable to set Render Pipeline!"))?);
-                    render_pass.set_vertex_buffer(0, VERTEX_BUFFERS.last().ok_or(KappaError::new("Unable to set Vertex Buffer!"))?.slice(..));
+                    render_pass.set_pipeline(
+                        self.pipelines
+                            .get("position_color".into())
+                            .ok_or(KappaError::new("Unable to set Render Pipeline!"))?,
+                    );
+                    render_pass.set_vertex_buffer(
+                        0,
+                        VERTEX_BUFFERS
+                            .last()
+                            .ok_or(KappaError::new("Unable to set Vertex Buffer!"))?
+                            .slice(..),
+                    );
                     render_pass.set_index_buffer(
-                        INDEX_BUFFERS.last().ok_or(KappaError::new("Unable to get last index buffer!"))?.slice(..),
+                        INDEX_BUFFERS
+                            .last()
+                            .ok_or(KappaError::new("Unable to get last index buffer!"))?
+                            .slice(..),
                         wgpu::IndexFormat::Uint16,
                     );
 
