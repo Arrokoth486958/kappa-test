@@ -152,8 +152,9 @@ impl RenderInstance {
                 topology: wgpu::PrimitiveTopology::TriangleList,
                 strip_index_format: None,
                 // 剔除部分
+                // TODO：有意思的东西
                 front_face: wgpu::FrontFace::Cw,
-                cull_mode: Some(Face::Back),
+                cull_mode: Some(Face::Front),
                 polygon_mode: wgpu::PolygonMode::Fill,
                 unclipped_depth: false,
                 conservative: false,
@@ -195,7 +196,6 @@ impl RenderInstance {
             ],
             vec![
                 0, 1, 2,
-                2, 3, 1,
             ]
         ));
 
@@ -256,47 +256,63 @@ impl RenderInstance {
             });
             for obj in &self.render_objects {
                 unsafe {
-                        let vertex_buffer =
-                            self.device
-                                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                                    label: None,
-                                    // contents: bytemuck::cast_slice(obj.vertex),
-                                    // contents: bytemuck::cast_slice(cache::get_vertex(
-                                    //     obj.vertex_addr,
-                                    // )),
-                                    contents: bytemuck::cast_slice(
-                                        cache::get_vertex(obj.vertex_addr).as_slice()
-                                    ),
-                                    usage: wgpu::BufferUsages::VERTEX,
-                                });
+                    let vertex_buffer =
+                        self.device
+                            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                                label: None,
+                                // contents: bytemuck::cast_slice(obj.vertex),
+                                // contents: bytemuck::cast_slice(cache::get_vertex(
+                                //     obj.vertex_addr,
+                                // )),
+                                contents: bytemuck::cast_slice(
+                                    cache::get_vertex(obj.vertex_addr)
+                                ),
+                                usage: wgpu::BufferUsages::VERTEX,
+                            });
+                    
+                    let index_buffer =
+                        self.device
+                            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                                label: None,
+                                contents: bytemuck::cast_slice(cache::get_index(
+                                    obj.index_addr,
+                                )),
+                                usage: wgpu::BufferUsages::INDEX,
+                            });
+                    
+                    // 所有权转移
+                    VERTEX_BUFFERS.push(vertex_buffer);
+                    INDEX_BUFFERS.push(index_buffer);
+                    
+                    render_pass.set_pipeline(self.pipelines.get("position_color".into()).unwrap());
+                    render_pass.set_vertex_buffer(0, VERTEX_BUFFERS.last().unwrap().slice(..));
+                    render_pass.set_index_buffer(
+                        INDEX_BUFFERS.last().unwrap().slice(..),
+                        wgpu::IndexFormat::Uint16,
+                    );
 
-                        let index_buffer =
-                            self.device
-                                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                                    label: None,
-                                    contents: bytemuck::cast_slice(cache::get_index(
-                                        obj.index_addr,
-                                    )),
-                                    usage: wgpu::BufferUsages::INDEX,
-                                });
-                        // 所有权转移
-                        VERTEX_BUFFERS.push(vertex_buffer);
-                        INDEX_BUFFERS.push(index_buffer);
+                    render_pass.draw_indexed(
+                        0..cache::get_index(obj.index_addr).len() as u32, 
+                        0, 
+                        0..1,
+                    );
                 }
-
-                render_pass.set_pipeline(self.pipelines.get("position_color".into()).unwrap());
-                // render_pass.set_pipeline(self.pipelines.get("position_color").unwrap().as_ref());
-
-                render_pass.draw_indexed(
-                    0..cache::get_index(obj.index_addr).len() as u32, 
-                    0, 
-                    0..1
-                );
             }
         }
 
         self.queue.submit(Some(encoder.finish()));
         output.present();
+
+        unsafe {
+            for i in &VERTEX_BUFFERS {
+                i.destroy();
+            }
+            VERTEX_BUFFERS.clear();
+            for i in &INDEX_BUFFERS {
+                i.destroy();
+            }
+            INDEX_BUFFERS.clear();
+        }
 
         Ok(())
     }
