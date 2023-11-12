@@ -3,7 +3,7 @@ use log::info;
 use winit::{
     dpi::LogicalSize,
     event_loop::{ControlFlow, EventLoop},
-    window::{WindowBuilder, WindowButtons},
+    window::{WindowBuilder, WindowButtons}
 };
 
 fn main() {

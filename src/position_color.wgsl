@@ -16,9 +16,9 @@ fn vs_main(
     model: VertexInput,
 ) -> VertexOutput {
     var out: VertexOutput;
-    let flipped_y = 1.0 - model.position.y;
-    let x = (model.position.x + 1.0) * 0.5;
-    let y = (flipped_y + 1.0) * 0.5;
+    // let flipped_y = 1.0 - model.position.y;
+    // let x = (model.position.x + 1.0) * 0.5;
+    // let y = (flipped_y + 1.0) * 0.5;
     out.color = model.color;
     // 不转换坐标的情况下
     // out.clip_position = vec4f(model.position, 1.0);

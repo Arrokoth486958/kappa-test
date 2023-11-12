@@ -1,4 +1,4 @@
-use std::{collections::HashMap, f32::consts::E};
+use std::collections::HashMap;
 
 use bytemuck::{Pod, Zeroable};
 use wgpu::{
@@ -44,11 +44,6 @@ pub struct RenderObject {
 
 impl RenderObject {
     pub fn new(vertex: Vec<Vertex>, index: Vec<u16>) -> RenderObject {
-
-        // 由于坐标转换，所以需要反转Index
-        let mut index: Vec<u16> = index;
-        index.reverse();
-
         RenderObject {
             vertex_addr: cache::alloc_vertex(vertex),
             index_addr: cache::alloc_index(index),
@@ -92,6 +87,10 @@ impl RenderInstance {
             .await
             .ok_or(KappaError::new("Could not create an adapter"))?;
 
+        for i in wgpu_instance.enumerate_adapters(Backends::all()) {
+            println!("{:?}", i.get_info());
+        }
+
         let (device, queue) = adapter
             .request_device(
                 &DeviceDescriptor {
@@ -106,6 +105,9 @@ impl RenderInstance {
         let caps = surface.get_capabilities(&adapter);
 
         // TODO: 更好，更强，更壮（指选择alpha channel
+        // 很后悔没有早点在macOS上测试
+        // 现在好了，渲染不出来了
+        // 好玄乎，又可以跑了
         let alpha_channel = if caps
             .alpha_modes
             .contains(&CompositeAlphaMode::PostMultiplied)
@@ -114,6 +116,7 @@ impl RenderInstance {
         } else {
             caps.alpha_modes[0]
         };
+        // let alpha_channel: CompositeAlphaMode = caps.alpha_modes[0];
 
         // TODO: 这玩意咋筛？
         let supported_formats = caps.formats.clone();
@@ -123,13 +126,14 @@ impl RenderInstance {
         } else {
             supported_formats[0]
         };
+        // let format = supported_formats[0];
 
         let config = SurfaceConfiguration {
             usage: TextureUsages::RENDER_ATTACHMENT,
             format: format,
             width: size.width,
             height: size.height,
-            present_mode: wgpu::PresentMode::Immediate,
+            present_mode: wgpu::PresentMode::Fifo,
             alpha_mode: alpha_channel,
             view_formats: vec![],
         };
@@ -161,7 +165,7 @@ impl RenderInstance {
                 entry_point: "fs_main",
                 targets: &[Some(ColorTargetState {
                     format: config.format,
-                    blend: Some(BlendState::PREMULTIPLIED_ALPHA_BLENDING),
+                    blend: Some(BlendState::ALPHA_BLENDING),
                     write_mask: ColorWrites::all(),
                 })],
             }),
@@ -170,7 +174,7 @@ impl RenderInstance {
                 strip_index_format: None,
                 // 剔除部分
                 // TODO：有意思的东西
-                front_face: wgpu::FrontFace::Cw,
+                front_face: wgpu::FrontFace::Ccw,
                 cull_mode: Some(Face::Front),
                 polygon_mode: wgpu::PolygonMode::Fill,
                 unclipped_depth: false,
@@ -193,25 +197,25 @@ impl RenderInstance {
                 // 左下
                 Vertex {
                     position: [0.0, 0.0, 0.0],
-                    color: [0.0, 0.0, 0.0, 0.0],
+                    color: [1.0, 0.0, 1.0, 0.5],
                     tex_coords: [0.0, 0.0],
                 },
                 // 右下
                 Vertex {
                     position: [1.0, 0.0, 0.0],
-                    color: [0.0, 0.0, 0.0, 0.0],
+                    color: [0.0, 0.0, 1.0, 0.5],
                     tex_coords: [0.0, 0.0],
                 },
                 // 右上
                 Vertex {
                     position: [1.0, 1.0, 0.0],
-                    color: [1.0, 1.0, 1.0, 0.0],
+                    color: [0.0, 1.0, 0.0, 0.5],
                     tex_coords: [0.0, 0.0],
                 },
                 // 左下
                 Vertex {
                     position: [0.0, 1.0, 0.0],
-                    color: [1.0, 1.0, 1.0, 0.0],
+                    color: [1.0, 0.0, 0.0, 0.5],
                     tex_coords: [0.0, 0.0],
                 },
             ],
