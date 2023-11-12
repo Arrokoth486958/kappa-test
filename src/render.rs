@@ -291,7 +291,7 @@ impl RenderInstance {
                     render_pass.set_pipeline(self.pipelines.get("position_color".into()).ok_or(KappaError::new("Unable to set Render Pipeline!"))?);
                     render_pass.set_vertex_buffer(0, VERTEX_BUFFERS.last().ok_or(KappaError::new("Unable to set Vertex Buffer!"))?.slice(..));
                     render_pass.set_index_buffer(
-                        INDEX_BUFFERS.last().unwrap().slice(..),
+                        INDEX_BUFFERS.last().ok_or(KappaError::new("Unable to get last index buffer!"))?.slice(..),
                         wgpu::IndexFormat::Uint16,
                     );
 
