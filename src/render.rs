@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, f32::consts::E};
 
 use bytemuck::{Pod, Zeroable};
 use wgpu::{
@@ -7,7 +7,7 @@ use wgpu::{
     FragmentState, Instance, InstanceDescriptor, Limits, LoadOp, MultisampleState, Operations,
     PipelineLayoutDescriptor, PrimitiveState, Queue, RenderPassColorAttachment,
     RenderPassDescriptor, RenderPipeline, RenderPipelineDescriptor, RequestAdapterOptions, Surface,
-    SurfaceConfiguration, TextureUsages, VertexAttribute, VertexBufferLayout, VertexState,
+    SurfaceConfiguration, TextureUsages, VertexAttribute, VertexBufferLayout, VertexState, TextureFormat,
 };
 use winit::{dpi::PhysicalSize, window::Window};
 
@@ -20,13 +20,13 @@ static mut INDEX_BUFFERS: Vec<Buffer> = Vec::new();
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Vertex {
     pub position: [f32; 3],
-    pub color: [f32; 3],
+    pub color: [f32; 4],
     pub tex_coords: [f32; 2],
 }
 
 impl Vertex {
     const ATTRIBS: [VertexAttribute; 3] =
-        wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x2];
+        wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x4, 2 => Float32x2];
 
     pub fn desc<'a>() -> VertexBufferLayout<'a> {
         VertexBufferLayout {
@@ -44,6 +44,11 @@ pub struct RenderObject {
 
 impl RenderObject {
     pub fn new(vertex: Vec<Vertex>, index: Vec<u16>) -> RenderObject {
+
+        // 由于坐标转换，所以需要反转Index
+        let mut index: Vec<u16> = index;
+        index.reverse();
+
         RenderObject {
             vertex_addr: cache::alloc_vertex(vertex),
             index_addr: cache::alloc_index(index),
@@ -110,9 +115,18 @@ impl RenderInstance {
             caps.alpha_modes[0]
         };
 
+        // TODO: 这玩意咋筛？
+        let supported_formats = caps.formats.clone();
+        println!("{:?}", supported_formats);
+        let format = if supported_formats.contains(&TextureFormat::Bgra8Unorm) {
+            TextureFormat::Bgra8Unorm
+        } else {
+            supported_formats[0]
+        };
+
         let config = SurfaceConfiguration {
             usage: TextureUsages::RENDER_ATTACHMENT,
-            format: caps.formats[0],
+            format: format,
             width: size.width,
             height: size.height,
             present_mode: wgpu::PresentMode::Immediate,
@@ -179,25 +193,25 @@ impl RenderInstance {
                 // 左下
                 Vertex {
                     position: [0.0, 0.0, 0.0],
-                    color: [1.0, 1.0, 1.0],
+                    color: [0.0, 0.0, 0.0, 0.0],
                     tex_coords: [0.0, 0.0],
                 },
                 // 右下
                 Vertex {
                     position: [1.0, 0.0, 0.0],
-                    color: [1.0, 1.0, 1.0],
+                    color: [0.0, 0.0, 0.0, 0.0],
                     tex_coords: [0.0, 0.0],
                 },
                 // 右上
                 Vertex {
                     position: [1.0, 1.0, 0.0],
-                    color: [1.0, 1.0, 1.0],
+                    color: [1.0, 1.0, 1.0, 0.0],
                     tex_coords: [0.0, 0.0],
                 },
                 // 左下
                 Vertex {
                     position: [0.0, 1.0, 0.0],
-                    color: [1.0, 1.0, 1.0],
+                    color: [1.0, 1.0, 1.0, 0.0],
                     tex_coords: [0.0, 0.0],
                 },
             ],

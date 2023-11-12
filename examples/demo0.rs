@@ -12,12 +12,18 @@ fn main() {
     info!("Initializing Kappa...");
 
     let event_loop = EventLoop::new().unwrap();
-    let window_builder = WindowBuilder::new()
+    let mut window_builder = WindowBuilder::new()
         .with_enabled_buttons(WindowButtons::CLOSE | WindowButtons::MINIMIZE)
         .with_inner_size(LogicalSize::new(600, 400))
         .with_min_inner_size(LogicalSize::new(600, 400))
         .with_title("Kappa")
         .with_visible(false);
+
+    #[cfg(target_os = "windows")]
+    {
+        window_builder = window_builder.with_transparent(true);
+    }
+    
     let window = window_builder.build(&event_loop).unwrap();
     let mut app = Application::new(&window).unwrap();
 
