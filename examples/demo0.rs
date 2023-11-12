@@ -19,13 +19,13 @@ fn main() {
         .with_title("Kappa")
         .with_visible(false);
 
-    #[cfg(target_os = "windows")]
-    {
-        window_builder = window_builder.with_transparent(true);
-    }
-
     let window = window_builder.build(&event_loop).unwrap();
     let mut app = Application::new(&window).unwrap();
+
+    #[cfg(target_os = "windows")]
+    {
+        window.set_transparent(true);
+    }
 
     window.set_visible(true);
     event_loop.set_control_flow(ControlFlow::Wait);
