@@ -24,6 +24,7 @@ impl<'a> Application<'a> {
         })
     }
 
+    // 芝士主循环事件
     pub fn on_loop(
         &mut self,
         event: Event<()>,

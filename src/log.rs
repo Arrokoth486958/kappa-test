@@ -10,6 +10,7 @@ use log4rs::{
 
 use crate::error::KappaError;
 
+// 配置日志
 pub fn init() -> Result<(), Box<dyn std::error::Error>> {
     // 配置日志系统
     let log_path = Path::new("logs/latest.log");
@@ -23,6 +24,7 @@ pub fn init() -> Result<(), Box<dyn std::error::Error>> {
             .into();
         let time = time.format("%Y%m%d-%H%M%S");
 
+        // 重复文件名处理
         let mut i = 0;
         let mut last_file = File::create(format!("logs/{}.log", time));
         while last_file.is_err() && i < 16 {
