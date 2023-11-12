@@ -176,28 +176,35 @@ impl RenderInstance {
         // TODO: Debug
         render_objects.push(RenderObject::new(
             vec![
+                // 左下
                 Vertex {
                     position: [0.0, 0.0, 0.0],
                     color: [1.0, 1.0, 1.0],
                     tex_coords: [0.0, 0.0],
                 },
+                // 右下
                 Vertex {
                     position: [1.0, 0.0, 0.0],
                     color: [1.0, 1.0, 1.0],
                     tex_coords: [0.0, 0.0],
                 },
+                // 右上
                 Vertex {
                     position: [1.0, 1.0, 0.0],
                     color: [1.0, 1.0, 1.0],
                     tex_coords: [0.0, 0.0],
                 },
+                // 左下
                 Vertex {
                     position: [0.0, 1.0, 0.0],
                     color: [1.0, 1.0, 1.0],
                     tex_coords: [0.0, 0.0],
                 },
             ],
-            vec![0, 1, 2],
+            vec![
+                0, 1, 2,
+                2, 3, 0,
+            ],
         ));
 
         Ok(RenderInstance {
@@ -281,8 +288,8 @@ impl RenderInstance {
                     VERTEX_BUFFERS.push(vertex_buffer);
                     INDEX_BUFFERS.push(index_buffer);
 
-                    render_pass.set_pipeline(self.pipelines.get("position_color".into()).unwrap());
-                    render_pass.set_vertex_buffer(0, VERTEX_BUFFERS.last().unwrap().slice(..));
+                    render_pass.set_pipeline(self.pipelines.get("position_color".into()).ok_or(KappaError::new("Unable to set Render Pipeline!"))?);
+                    render_pass.set_vertex_buffer(0, VERTEX_BUFFERS.last().ok_or(KappaError::new("Unable to set Vertex Buffer!"))?.slice(..));
                     render_pass.set_index_buffer(
                         INDEX_BUFFERS.last().unwrap().slice(..),
                         wgpu::IndexFormat::Uint16,

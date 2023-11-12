@@ -38,6 +38,9 @@ impl<'a> Application<'a> {
                             elwt.exit();
                         }
                         WindowEvent::Resized(size) => {
+                            // 为了修复窗口在重新放大后被别的窗口挡住
+                            self.window.focus_window();
+
                             self.render_instance.resize(*size);
                             #[cfg(target_os = "macos")]
                             self.window.request_redraw();

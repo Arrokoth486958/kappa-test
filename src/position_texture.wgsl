@@ -9,6 +9,7 @@ struct VertexInput {
 struct VertexOutput {
     @builtin(position) clip_position: vec4f,
     @location(0) color: vec3f,
+    @location(1) uv: vec2f,
 };
 
 @vertex
@@ -21,6 +22,7 @@ fn vs_main(
     let y = (flipped_y + 1.0) * 0.5;
     out.color = model.color;
     out.clip_position = vec4f(model.position, 1.0);
+    out.uv = mode.uv;
     // out.clip_position = (vec4f(model.position, 1.0) / vec4f(surface_size, 1.0) * vec4f(1.0, -1.0, 1.0, 1.0) - vec4f(0.5, -0.5, 0.0, 0.0)) / vec4f(0.5, 0.5, 1.0, 1.0);
     return out;
 }
@@ -34,5 +36,6 @@ var s_diffuse: sampler;
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4f {
-    return vec4f(in.color, 1.0);
+    var color = textureSample(t_diffuse, s_diffuse, vec2f(in.uv.x, 1.0 - in.uv.y));
+    return vec4f(in.color, 1.0) * color;
 }

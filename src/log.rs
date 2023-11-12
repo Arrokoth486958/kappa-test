@@ -63,7 +63,7 @@ pub fn init() -> Result<(), Box<dyn std::error::Error>> {
         .build(
             Root::builder()
                 .appenders(vec!["logfile", "console"])
-                .build(log::LevelFilter::Info),
+                .build(log::LevelFilter::Warn),
         )?;
 
     log4rs::init_config(config)?;
