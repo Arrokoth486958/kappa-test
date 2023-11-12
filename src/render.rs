@@ -117,7 +117,7 @@ impl RenderInstance {
         } else {
             caps.alpha_modes[0]
         };
-        let alpha_channel: CompositeAlphaMode = caps.alpha_modes[0];
+        // let alpha_channel: CompositeAlphaMode = caps.alpha_modes[0];
         println!("{:?}", caps.alpha_modes);
         // let alpha_channel: CompositeAlphaMode = CompositeAlphaMode::Opaque;
 
