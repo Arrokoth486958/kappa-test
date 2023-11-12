@@ -1,14 +1,17 @@
 use std::collections::HashMap;
 
-use bytemuck::{Zeroable, Pod};
+use bytemuck::{Pod, Zeroable};
 use wgpu::{
-    Adapter, Backends, CompositeAlphaMode, Device, DeviceDescriptor, Features, Instance,
-    InstanceDescriptor, Limits, Queue, RequestAdapterOptions, Surface, SurfaceConfiguration,
-    TextureUsages, RenderPassDescriptor, RenderPassColorAttachment, Operations, LoadOp, Color, RenderPipeline, RenderPass, include_wgsl, PipelineLayoutDescriptor, RenderPipelineDescriptor, VertexState, FragmentState, ColorTargetState, BlendState, ColorWrites, PrimitiveState, MultisampleState, Face, VertexAttribute, VertexBufferLayout, BufferAddress, util::DeviceExt, Buffer,
+    include_wgsl, util::DeviceExt, Adapter, Backends, BlendState, Buffer, BufferAddress, Color,
+    ColorTargetState, ColorWrites, CompositeAlphaMode, Device, DeviceDescriptor, Face, Features,
+    FragmentState, Instance, InstanceDescriptor, Limits, LoadOp, MultisampleState, Operations,
+    PipelineLayoutDescriptor, PrimitiveState, Queue, RenderPassColorAttachment,
+    RenderPassDescriptor, RenderPipeline, RenderPipelineDescriptor, RequestAdapterOptions, Surface,
+    SurfaceConfiguration, TextureUsages, VertexAttribute, VertexBufferLayout, VertexState,
 };
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::{error::KappaError, cache};
+use crate::{cache, error::KappaError};
 
 static mut VERTEX_BUFFERS: Vec<Buffer> = Vec::new();
 static mut INDEX_BUFFERS: Vec<Buffer> = Vec::new();
@@ -168,7 +171,7 @@ impl RenderInstance {
         });
         pipelines.insert("position_color".into(), pipeline);
 
-        let mut render_objects =  Vec::new();
+        let mut render_objects = Vec::new();
 
         // TODO: Debug
         render_objects.push(RenderObject::new(
@@ -194,9 +197,7 @@ impl RenderInstance {
                     tex_coords: [0.0, 0.0],
                 },
             ],
-            vec![
-                0, 1, 2,
-            ]
+            vec![0, 1, 2],
         ));
 
         Ok(RenderInstance {
@@ -235,7 +236,7 @@ impl RenderInstance {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("Render Encoder"),
             });
-        
+
         {
             let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
                 label: Some("Render Pass"),
@@ -264,26 +265,22 @@ impl RenderInstance {
                                 // contents: bytemuck::cast_slice(cache::get_vertex(
                                 //     obj.vertex_addr,
                                 // )),
-                                contents: bytemuck::cast_slice(
-                                    cache::get_vertex(obj.vertex_addr)
-                                ),
+                                contents: bytemuck::cast_slice(cache::get_vertex(obj.vertex_addr)),
                                 usage: wgpu::BufferUsages::VERTEX,
                             });
-                    
+
                     let index_buffer =
                         self.device
                             .create_buffer_init(&wgpu::util::BufferInitDescriptor {
                                 label: None,
-                                contents: bytemuck::cast_slice(cache::get_index(
-                                    obj.index_addr,
-                                )),
+                                contents: bytemuck::cast_slice(cache::get_index(obj.index_addr)),
                                 usage: wgpu::BufferUsages::INDEX,
                             });
-                    
+
                     // 所有权转移
                     VERTEX_BUFFERS.push(vertex_buffer);
                     INDEX_BUFFERS.push(index_buffer);
-                    
+
                     render_pass.set_pipeline(self.pipelines.get("position_color".into()).unwrap());
                     render_pass.set_vertex_buffer(0, VERTEX_BUFFERS.last().unwrap().slice(..));
                     render_pass.set_index_buffer(
@@ -292,8 +289,8 @@ impl RenderInstance {
                     );
 
                     render_pass.draw_indexed(
-                        0..cache::get_index(obj.index_addr).len() as u32, 
-                        0, 
+                        0..cache::get_index(obj.index_addr).len() as u32,
+                        0,
                         0..1,
                     );
                 }

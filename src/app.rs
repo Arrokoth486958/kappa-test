@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-
-use wgpu::RenderPipeline;
 use winit::{
     event::{Event, WindowEvent},
     window::Window,
