@@ -76,7 +76,7 @@ impl RenderInstance {
         });
 
         let surface =
-            unsafe { wgpu_instance.create_surface(window) }.expect("Could not create a Surface!");
+            unsafe { wgpu_instance.create_surface(window) }?;
 
         // TODO: 支持Backend优先级
         let adapter = wgpu_instance
@@ -117,7 +117,9 @@ impl RenderInstance {
         } else {
             caps.alpha_modes[0]
         };
-        // let alpha_channel: CompositeAlphaMode = caps.alpha_modes[0];
+        let alpha_channel: CompositeAlphaMode = caps.alpha_modes[0];
+        println!("{:?}", caps.alpha_modes);
+        // let alpha_channel: CompositeAlphaMode = CompositeAlphaMode::Opaque;
 
         // TODO: 这玩意咋筛？
         let supported_formats = caps.formats.clone();
@@ -166,7 +168,7 @@ impl RenderInstance {
                 entry_point: "fs_main",
                 targets: &[Some(ColorTargetState {
                     format: config.format,
-                    blend: Some(BlendState::ALPHA_BLENDING),
+                    blend: Some(BlendState::PREMULTIPLIED_ALPHA_BLENDING),
                     write_mask: ColorWrites::all(),
                 })],
             }),
@@ -197,25 +199,25 @@ impl RenderInstance {
             vec![
                 // 左下
                 Vertex {
-                    position: [0.0, 0.0, 0.0],
+                    position: [0.25, 0.25, 0.0],
                     color: [1.0, 0.0, 1.0, 0.5],
                     tex_coords: [0.0, 0.0],
                 },
                 // 右下
                 Vertex {
-                    position: [1.0, 0.0, 0.0],
+                    position: [0.75, 0.25, 0.0],
                     color: [0.0, 0.0, 1.0, 0.5],
                     tex_coords: [0.0, 0.0],
                 },
                 // 右上
                 Vertex {
-                    position: [1.0, 1.0, 0.0],
+                    position: [0.75, 0.75, 0.0],
                     color: [0.0, 1.0, 0.0, 0.5],
                     tex_coords: [0.0, 0.0],
                 },
                 // 左下
                 Vertex {
-                    position: [0.0, 1.0, 0.0],
+                    position: [0.25, 0.75, 0.0],
                     color: [1.0, 0.0, 0.0, 0.5],
                     tex_coords: [0.0, 0.0],
                 },
@@ -284,10 +286,6 @@ impl RenderInstance {
                         self.device
                             .create_buffer_init(&wgpu::util::BufferInitDescriptor {
                                 label: None,
-                                // contents: bytemuck::cast_slice(obj.vertex),
-                                // contents: bytemuck::cast_slice(cache::get_vertex(
-                                //     obj.vertex_addr,
-                                // )),
                                 contents: bytemuck::cast_slice(cache::get_vertex(obj.vertex_addr)),
                                 usage: wgpu::BufferUsages::VERTEX,
                             });
