@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use bytemuck::{Pod, Zeroable};
 use wgpu::{RenderPipeline, RenderPipelineDescriptor, PrimitiveState, PipelineLayoutDescriptor, Face, VertexState, VertexAttribute, VertexBufferLayout, BufferAddress, FragmentState, ColorTargetState, BlendState, ColorWrites, MultisampleState, include_wgsl, RenderPass};
 
-use crate::wgpu::RenderInstance;
+use crate::{wgpu::RenderInstance, cache};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -26,9 +26,24 @@ impl Vertex {
     }
 }
 
+pub struct RenderObject {
+    vertex_addr: usize,
+    index_addr: usize,
+}
+
+impl RenderObject {
+    pub fn new(vertex: Vec<Vertex>, index: Vec<u16>) -> RenderObject {
+        RenderObject {
+            vertex_addr: cache::alloc_vertex(vertex),
+            index_addr: cache::alloc_index(index),
+        }
+    }
+}
+
 #[allow(dead_code)]
 pub struct RenderSystem {
     pipelines: HashMap<String, Arc<RenderPipeline>>,
+    render_objects: Vec<RenderObject>,
 }
 
 impl RenderSystem {
@@ -83,8 +98,11 @@ impl RenderSystem {
             multiview: None,
         });
 
+        let render_objects = Vec::new();
+
         Ok(RenderSystem {
             pipelines,
+            render_objects,
         })
     }
 
